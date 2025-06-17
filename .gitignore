@@ -5,11 +5,11 @@ __pycache__/
 *.pyc
 
 # Ignore environment variables file
-.env
+backend/.env
 
 # Ignore virtual environment folder (common practice)
-venv/
-.venv/
+backend/venv/
+backend/.venv/
 
 # You can add other things here, like logs or temporary files
 *.log
