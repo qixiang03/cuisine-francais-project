@@ -1,0 +1,16 @@
+# .gitignore
+
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
+# Ignore environment variables file
+.env
+
+# Ignore virtual environment folder (common practice)
+venv/
+.venv/
+
+# You can add other things here, like logs or temporary files
+*.log
+temp/
