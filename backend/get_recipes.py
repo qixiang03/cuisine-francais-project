@@ -96,7 +96,6 @@ try:
         print(f"Points remaining today: {quota_left}")
     else:
         print("Quota headers not found in response. (May indicate an issue or different API plan)")
-    # --- End of new code ---
 
     # Check if any recipes were found
     if data and data.get('results'):
@@ -107,7 +106,16 @@ try:
         ingredients_list = first_recipe.get('extendedIngredients', [])
 
         print("\n--- First Recipe Details ---")
-        print(f"Title: {title}")
+        print(f"Title (Original): {title}")
+
+        # Translate the title
+        if title:
+            translated_title = translate_text(title, target_language='fr')
+            print(f"Title (French): {translated_title}")
+        else:
+            print("Title: Not available")
+
+
         if cooking_time is not None:
             print(f"Cooking Time: {cooking_time} minutes")
         else:
@@ -115,14 +123,23 @@ try:
 
         print("Ingredients:")
         if ingredients_list:
-            for ingredient in ingredients_list:
-                print(f"- {ingredient.get('original')}")
+            # Translate a few ingredients (e.g., the first 3 or all)
+            for i, ingredient in enumerate(ingredients_list):
+                original_ingredient = ingredient.get('original')
+                if original_ingredient:
+                    translated_ingredient = translate_text(original_ingredient, target_language='fr')
+                    print(f"- {original_ingredient} (French: {translated_ingredient})")
+                else:
+                    print(f"- [Ingredient not available]")
+                # Optionally, break after a few to save on quota if translating many
+                # if i >= 2: # Translate only first 3 ingredients
+                #    break
         else:
             print("No ingredients found.")
 
     else:
-        print(f"No recipes found for '{params["query"]}' in {params["cuisine"]} cuisine.")
-
+        print("No recipes found for 'Boeuf Bourguignon' in French cuisine.")
+        
 except requests.exceptions.RequestException as e:
     print(f"An error occurred during the API request: {e}")
     # When an error (like 402 for quota exceeded) occurs, check response headers if available
