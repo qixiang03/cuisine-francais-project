@@ -67,7 +67,7 @@ def translate_text(text, target_language='fr'):
 BASE_URL = "https://api.spoonacular.com/recipes/complexSearch"
 
 params = {
-    "apiKey": api_key,
+    "apiKey": SPOONACULAR_API_KEY,
     "cuisine": "French",
     "query": "Salade niçoise",
     "number": 1, # Request only 1 recipe
@@ -139,7 +139,7 @@ try:
 
     else:
         print("No recipes found for 'Boeuf Bourguignon' in French cuisine.")
-        
+
 except requests.exceptions.RequestException as e:
     print(f"An error occurred during the API request: {e}")
     # When an error (like 402 for quota exceeded) occurs, check response headers if available
