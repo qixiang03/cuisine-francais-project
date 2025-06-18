@@ -1,17 +1,68 @@
 import os
-from dotenv import load_dotenv
 import requests
+import deepl # Add this import
+from dotenv import load_dotenv
 
 load_dotenv()
 
-api_key = os.getenv("SPOONACULAR_API_KEY")
+# Get the API keys
+SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY')
+DEEPL_API_KEY = os.getenv('DEEPL_API_KEY') # Get DeepL key
+DEEPL_API_TYPE = os.getenv('DEEPL_API_TYPE', 'free').lower() # 'free' or 'pro'
 
-if api_key:
-    print(f"API Key loaded successfully: {api_key[:5]}... (showing first 5 chars)")
-else:
-    print("Error: SPOONACULAR_API_KEY not found in environment variables.")
-    print("Please make sure you have a .env file with SPOONACULAR_API_KEY=your_key")
+if SPOONACULAR_API_KEY is None:
+    print("Error: SPOONACULAR_API_KEY not found in .env file.")
     exit()
+if DEEPL_API_KEY is None:
+    print("Error: DEEPL_API_KEY not found in .env file.")
+    exit()
+
+print("Spoonacular API Key loaded successfully.")
+print("DeepL API Key loaded successfully.")
+
+
+# Initialize DeepL Translator (global scope or passed around, but for a script, global is fine)
+translator = None
+try:
+    if DEEPL_API_TYPE == 'free':
+        translator = deepl.Translator(DEEPL_API_KEY, server_url="https://api-free.deepl.com")
+        print("Using DeepL Free API.")
+    else: # Default to Pro if not explicitly 'free'
+        translator = deepl.Translator(DEEPL_API_KEY)
+        print("Using DeepL Pro API.")
+    # Optional: Verify authentication
+    user_usage = translator.get_usage()
+    if user_usage.any_limit_reached:
+        print("DeepL quota limit reached or warning received. Translations might fail.")
+    elif user_usage.character:
+        print(f"DeepL Characters Used: {user_usage.character.count}, Limit: {user_usage.character.limit}")
+except deepl.DeepLError as e:
+    print(f"Error initializing DeepL Translator: {e}")
+    print("Please check your DeepL API key and API type ('free' or 'pro').")
+    translator = None # Ensure translator is None if initialization fails
+
+
+def translate_text(text, target_language='fr'):
+    """
+    Translates the given text to the target language using DeepL.
+    """
+    if not text or not translator:
+        return "" # Return empty string if no text or translator isn't initialized
+
+    try:
+        # DeepL automatically detects source language, so we only specify target.
+        result = translator.translate_text(text, target_lang=target_language)
+        return result.text
+    except deepl.exceptions.DeepLError as e:
+        print(f"DeepL translation error: {e}")
+        # Common errors: quota exceeded (429), invalid auth (403), etc.
+        return f"[Translation Error: {e}]"
+    except Exception as e:
+        print(f"An unexpected error occurred during translation: {e}")
+        return f"[Translation Error: {e}]"
+
+
+
 
 BASE_URL = "https://api.spoonacular.com/recipes/complexSearch"
 
@@ -70,7 +121,7 @@ try:
             print("No ingredients found.")
 
     else:
-        print(f"No recipes found for '{params["query"]}' in French cuisine.")
+        print(f"No recipes found for '{params["query"]}' in {params["cuisine"]} cuisine.")
 
 except requests.exceptions.RequestException as e:
     print(f"An error occurred during the API request: {e}")
