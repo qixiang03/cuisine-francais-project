@@ -4,6 +4,7 @@ from get_recipes import get_and_translate_recipe
 app = Flask(__name__)
 
 # Basic route for testing if the server is running8@app.route('/')
+@app.route('/')
 def home():
     return "Welcome to the Recipe API! Use /api/search?dish=<your_dish_query>"
 
@@ -14,7 +15,7 @@ def search_recipe():
     Requires a 'dish' query parameter
     Example: /api/search?dish=ratatouille
     """
-    dish_query = requests.args.get('dish')
+    dish_query = request.args.get('dish')
 
     if not dish_query:
         #return error if 'dish' parameter is missing
@@ -43,6 +44,6 @@ def search_recipe():
     
 
 if __name__ == '__main__':
-    
+
     app.run(debug=True, host='0.0.0.0', port=5000)
 
